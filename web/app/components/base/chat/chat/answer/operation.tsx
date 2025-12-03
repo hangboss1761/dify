@@ -7,6 +7,7 @@ import {
 import { useTranslation } from 'react-i18next'
 import {
   RiClipboardLine,
+  RiDownloadLine,
   RiResetLeftLine,
   RiThumbDownLine,
   RiThumbUpLine,
@@ -14,6 +15,7 @@ import {
 import type { ChatItem } from '../../types'
 import { useChatContext } from '../context'
 import copy from 'copy-to-clipboard'
+import { downloadAsDocx } from './download-docx'
 import Toast from '@/app/components/base/toast'
 import AnnotationCtrlButton from '@/app/components/base/features/new-feature-panel/annotation-reply/annotation-ctrl-button'
 import EditReplyModal from '@/app/components/app/annotation/edit-annotation-modal'
@@ -31,6 +33,7 @@ type OperationProps = {
   contentWidth: number
   hasWorkflowProcess: boolean
   noChatInput?: boolean
+  contentRef?: React.RefObject<HTMLDivElement | null>
 }
 const Operation: FC<OperationProps> = ({
   item,
@@ -41,6 +44,7 @@ const Operation: FC<OperationProps> = ({
   contentWidth,
   hasWorkflowProcess,
   noChatInput,
+  contentRef,
 }) => {
   const { t } = useTranslation()
   const {
@@ -52,6 +56,7 @@ const Operation: FC<OperationProps> = ({
     onRegenerate,
   } = useChatContext()
   const [isShowReplyModal, setIsShowReplyModal] = useState(false)
+  const [isDownloading, setIsDownloading] = useState(false)
   const {
     id,
     isOpeningStatement,
@@ -78,6 +83,24 @@ const Operation: FC<OperationProps> = ({
     setLocalFeedback({ rating })
   }
 
+  const handleDownload = async () => {
+    if (isDownloading)
+      return
+
+    setIsDownloading(true)
+    try {
+      await downloadAsDocx(content, contentRef?.current)
+      Toast.notify({ type: 'success', message: t('common.operation.downloadSuccess') })
+    }
+    catch (error) {
+      console.error('Download failed:', error)
+      Toast.notify({ type: 'error', message: t('common.operation.downloadFailed') })
+    }
+    finally {
+      setIsDownloading(false)
+    }
+  }
+
   const operationWidth = useMemo(() => {
     let width = 0
     if (!isOpeningStatement)
@@ -86,6 +109,8 @@ const Operation: FC<OperationProps> = ({
       width += 28 + 8
     if (!isOpeningStatement && config?.text_to_speech?.enabled)
       width += 26
+    if (!isOpeningStatement && config?.supportDownload)
+      width += 26
     if (!isOpeningStatement && config?.supportAnnotation && config?.annotation_reply?.enabled)
       width += 26
     if (config?.supportFeedback && !localFeedback?.rating && onFeedback && !isOpeningStatement)
@@ -93,7 +118,7 @@ const Operation: FC<OperationProps> = ({
     if (config?.supportFeedback && localFeedback?.rating && onFeedback && !isOpeningStatement)
       width += 28 + 8
     return width
-  }, [isOpeningStatement, showPromptLog, config?.text_to_speech?.enabled, config?.supportAnnotation, config?.annotation_reply?.enabled, config?.supportFeedback, localFeedback?.rating, onFeedback])
+  }, [isOpeningStatement, showPromptLog, config?.text_to_speech?.enabled, config?.supportDownload, config?.supportAnnotation, config?.annotation_reply?.enabled, config?.supportFeedback, localFeedback?.rating, onFeedback])
 
   const positionRight = useMemo(() => operationWidth < maxSize, [operationWidth, maxSize])
 
@@ -128,6 +153,11 @@ const Operation: FC<OperationProps> = ({
             }}>
               <RiClipboardLine className='h-4 w-4' />
             </ActionButton>
+            {config?.supportDownload && (
+              <ActionButton onClick={handleDownload} disabled={isDownloading}>
+                <RiDownloadLine className={`h-4 w-4 ${isDownloading ? 'animate-pulse' : ''}`} />
+              </ActionButton>
+            )}
             {!noChatInput && (
               <ActionButton onClick={() => onRegenerate?.(item)}>
                 <RiResetLeftLine className='h-4 w-4' />

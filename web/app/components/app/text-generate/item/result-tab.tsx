@@ -11,15 +11,17 @@ const ResultTab = ({
   data,
   content,
   currentTab,
+  contentRef,
 }: {
   data?: WorkflowProcess
   content: any
   currentTab: string
+  contentRef?: React.RefObject<HTMLDivElement | null>
 }) => {
   return (
     <>
       {currentTab === 'RESULT' && (
-        <div className='space-y-3 p-4'>
+        <div ref={contentRef} className='space-y-3 p-4'>
           {data?.resultText && <Markdown content={data?.resultText || ''} />}
           {!!data?.files?.length && (
             <div className='flex flex-col gap-2'>
@@ -53,4 +55,5 @@ const ResultTab = ({
   )
 }
 
+ResultTab.displayName = 'ResultTab'
 export default memo(ResultTab)

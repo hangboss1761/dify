@@ -125,6 +125,7 @@ export const useConfigFromDebugContext = () => {
     annotation_reply: annotationConfig,
 
     supportAnnotation: true,
+    supportDownload: true,
     appId,
     supportCitationHitInfo: true,
   }

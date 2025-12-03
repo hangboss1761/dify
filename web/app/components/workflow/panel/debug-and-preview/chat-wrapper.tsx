@@ -159,6 +159,7 @@ const ChatWrapper = (
         config={{
           ...config,
           supportCitationHitInfo: true,
+          supportDownload: true,
         } as any}
         chatList={chatList}
         isResponding={isResponding}

@@ -62,6 +62,7 @@ const ChatWrapper = () => {
         fileUploadConfig: (config as any).system_parameters,
       },
       supportFeedback: true,
+      supportDownload: true,
       opening_statement: currentConversationId ? currentConversationItem?.introduction : (config as any).opening_statement,
     } as ChatConfig
   }, [appParams, currentConversationItem?.introduction, currentConversationId])

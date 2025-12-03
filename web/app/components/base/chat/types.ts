@@ -49,6 +49,7 @@ export type ChatConfig = Omit<ModelConfig, 'model'> & {
   questionEditEnable?: boolean
   supportFeedback?: boolean
   supportCitationHitInfo?: boolean
+  supportDownload?: boolean
   system_parameters: {
     audio_file_size_limit: number
     file_size_limit: number

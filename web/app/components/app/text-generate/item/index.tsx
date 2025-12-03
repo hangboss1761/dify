@@ -1,10 +1,11 @@
 'use client'
 import type { FC } from 'react'
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import {
   RiBookmark3Line,
   RiClipboardLine,
+  RiDownloadLine,
   RiFileList3Line,
   RiPlayList2Line,
   RiReplay15Line,
@@ -31,6 +32,7 @@ import { useChatContext } from '@/app/components/base/chat/chat/context'
 import ActionButton, { ActionButtonState } from '@/app/components/base/action-button'
 import NewAudioButton from '@/app/components/base/new-audio-button'
 import cn from '@/utils/classnames'
+import { downloadAsDocx } from '@/app/components/base/chat/chat/answer/download-docx'
 
 const MAX_DEPTH = 3
 
@@ -104,6 +106,8 @@ const GenerationItem: FC<IGenerationItemProps> = ({
   const [childFeedback, setChildFeedback] = useState<FeedbackType>({
     rating: null,
   })
+  const [isDownloading, setIsDownloading] = useState(false)
+  const contentRef = useRef<HTMLDivElement>(null)
   const {
     config,
   } = useChatContext()
@@ -263,7 +267,7 @@ const GenerationItem: FC<IGenerationItemProps> = ({
                     )}
                   </div>
                   {!isError && (
-                    <ResultTab data={workflowProcessData} content={content} currentTab={currentTab} />
+                    <ResultTab contentRef={contentRef} data={workflowProcessData} content={content} currentTab={currentTab} />
                   )}
                 </>
               )}
@@ -322,6 +326,28 @@ const GenerationItem: FC<IGenerationItemProps> = ({
                       Toast.notify({ type: 'success', message: t('common.actionMsg.copySuccessfully') })
                     }}>
                       <RiClipboardLine className='h-4 w-4' />
+                    </ActionButton>
+                  )}
+                  {isWorkflow && (currentTab === 'RESULT' && workflowProcessData?.resultText) && (
+                    <ActionButton disabled={isError || !messageId || isDownloading} onClick={async () => {
+                      if (isDownloading) return
+                      setIsDownloading(true)
+                      try {
+                        const downloadContent = workflowProcessData?.resultText
+                        if (typeof downloadContent === 'string') {
+                          await downloadAsDocx(downloadContent, contentRef.current)
+                          Toast.notify({ type: 'success', message: t('common.operation.downloadSuccess') })
+                        }
+                      }
+ catch (error) {
+                        console.error('Download failed:', error)
+                        Toast.notify({ type: 'error', message: t('common.operation.downloadFailed') })
+                      }
+ finally {
+                        setIsDownloading(false)
+                      }
+                    }}>
+                      <RiDownloadLine className={`h-4 w-4 ${isDownloading ? 'animate-pulse' : ''}`} />
                     </ActionButton>
                   )}
                   {isInWebApp && isError && (

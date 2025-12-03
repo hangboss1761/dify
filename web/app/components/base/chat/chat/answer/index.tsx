@@ -134,6 +134,7 @@ const Answer: FC<AnswerProps> = ({
                   index={index}
                   showPromptLog={showPromptLog}
                   noChatInput={noChatInput}
+                  contentRef={contentRef}
                 />
               )
             }

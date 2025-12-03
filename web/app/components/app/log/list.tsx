@@ -710,6 +710,7 @@ function DetailPanel({ detail, onFeedback }: IDetailPanel) {
                     enabled: true,
                   },
                   supportFeedback: true,
+                  supportDownload: true,
                 } as any}
                 chatList={threadChatItems}
                 onAnnotationAdded={handleAnnotationAdded}
@@ -756,6 +757,7 @@ function DetailPanel({ detail, onFeedback }: IDetailPanel) {
                       enabled: true,
                     },
                     supportFeedback: true,
+                    supportDownload: true,
                   } as any}
                   chatList={threadChatItems}
                   onAnnotationAdded={handleAnnotationAdded}
